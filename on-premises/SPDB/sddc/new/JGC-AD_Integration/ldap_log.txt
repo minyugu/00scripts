@@ -1,0 +1,26 @@
+﻿开启日志：
+Reg Query HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events"
+
+Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 2
+
+Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 5
+
+修改日志大小到2GB：
+Reg Query "HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service" /v "MaxSize"
+
+Reg Add "HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service" /v MaxSize /t REG_DWORD /d 2147483648
+
+读取日志：
+
+关闭日志：
+Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 0 /f
+
+Reg Add "HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service" /v MaxSize /t REG_DWORD /d 0x80000 /f
+
+Reg Query "HKLM\SYSTEM\CurrentControlSet\Services\EventLog\Directory Service" /v "MaxSize"
+Reg Query HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events"
+
+
+D:\DNS_Log\32.log
+
+100000000

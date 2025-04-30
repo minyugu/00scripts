@@ -1,0 +1,19 @@
+{
+  "Name": "MG Virtual Machine Operator",
+  "IsCustom": true,
+  "Description": "Can deallocate, start  and restart virtual machines.",
+  "Actions": [
+    "Microsoft.Network/*/read",
+    "Microsoft.Compute/*/read",
+    "Microsoft.Compute/virtualMachines/start/action",
+    "Microsoft.Compute/virtualMachines/restart/action",
+    "Microsoft.Compute/virtualMachines/deallocate/action"
+  ],
+  "NotActions": [
+
+
+  ],
+  "AssignableScopes": [
+    "/subscriptions/07936935-5ab8-40b8-9c34-e097c4d462ea"
+  ]
+}
