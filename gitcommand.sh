@@ -36,3 +36,8 @@ git push
 git remote -v
 # see branch
 git branch -a
+
+# config
+git config --list --show-origin
+git config --global user.name "My Gu"
+git config --global user.email mygu@omygu.com
