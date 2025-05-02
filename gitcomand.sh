@@ -1,5 +1,6 @@
 # remove git repo
 rm -rf .git
+del .git
 
 # To remove tracked files that are now in .gitignore, do this:
 git rm -r --cached .
@@ -8,11 +9,11 @@ git commit -m "Remove ignored files from repo"
 
 
 # Clone the repository from the remote Git server
-git clone https://github.com/your-org/your-repo.git
+git clone https://github.com/minyugu/00scripts
 # or using SSH:
 git clone git@github.com:your-org/your-repo.git
 # Create a new branch to work on
-git checkout -b feature/my-change
+git checkout -b feature/test-change
 
 # Commit and push your changes
 git add .
