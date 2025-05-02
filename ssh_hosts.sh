@@ -45,3 +45,7 @@ ssh-keygen -f ~/downloads/k0-root-key -p -N "" -m pem > ~/downloads/k0-root.key
 
 
 ssh mygu@genymotion.eastasia.cloudapp.azure.com -p 22 -i ~/.ssh/mygu_genymotion.pem
+
+# install ssh on windows
+Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 
