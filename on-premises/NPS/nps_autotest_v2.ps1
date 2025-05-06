@@ -92,8 +92,33 @@ try {
     $networkContainer = $NPSConfig.SelectSingleNode($networkXPath, $ns)
     if (-not $networkContainer) { throw "未找到 NetworkPolicy 的 Children 节点" }
     
-    # 构造 RadiusProfiles 模板（含PEAP配置）需要设置身份验证方法为EAP
-    $radiusTemplate = @"
+####[mg]####
+#region [mg] find the network policy with specific mac
+    $macExisted = $false
+    $networkPolicys = $NPSConfig.SelectNodes($networkXPath)
+    foreach ($networkPolicy in $networkPolicys) {
+        foreach ($npEnum in $networkPolicy.GetEnumerator() ) {
+            $npEnum.GetElementsByTagName("msNPConstraint") | Where-Object { $null -ne $_ } | ForEach-Object {
+                if ($_.InnerText.trim() -eq "MATCH(`"Calling-Station-Id=$cleanMAC`")") {
+                    $npEnum.GetElementsByTagName("Policy_Enabled") | Where-Object { $null -ne $_ } | ForEach-Object {
+                        # enable policy
+                        if ($_.InnerText.trim() -eq "0") {
+                            $_.InnerText = "1"
+                        }
+                    }
+                    $macExisted = $true
+                    break
+                }
+            }
+        }
+    }
+#endregion
+
+####[mg]####
+    # check if the mac address not exists in the configuration then add the new policy
+    if ($macExisted -eq $false) {
+        # 构造 RadiusProfiles 模板（含PEAP配置）需要设置身份验证方法为EAP
+        $radiusTemplate = @"
 <Test_deny name="$policyNameNew">
     <Properties>
         <IP_Filter_Template_Guid xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">{00000000-0000-0000-0000-000000000000}</IP_Filter_Template_Guid>
@@ -116,9 +141,19 @@ try {
     </Properties>
 </Test_deny>
 "@
-    
-    # 构造 NetworkPolicy 模板（含Policy_Enabled属性并设置参数后续需要通过这个参数设置定时任务中的禁用策略）优化：删除不做禁用??
-    $networkTemplate = @"
+
+####[mg]####
+        #region find the maximum value of msNPSequence in an XML file to increment the sequence number of network policy
+        $lastSequence = $NPSConfig.SelectNodes($networkXPath) | 
+            ForEach-Object { $_.GetElementsByTagName("msNPSequence") } |
+            Where-Object { $_ -ne $null } |
+            ForEach-Object { [int]$_.InnerText } |
+            Measure-Object -Maximum
+        #endregion
+
+        # 构造 NetworkPolicy 模板（含Policy_Enabled属性并设置参数后续需要通过这个参数设置定时任务中的禁用策略）优化：删除不做禁用??
+####[mg]#### add sequence number to the network policy template
+        $networkTemplate = @"
 <Test_deny name="$policyNameNew">
     <Properties>
         <Opaque_Data xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string"></Opaque_Data>
@@ -129,20 +164,21 @@ try {
         <msNPConstraint xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">
             MATCH("Calling-Station-Id=$cleanMAC")
         </msNPConstraint>
-        <msNPSequence xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="int">1</msNPSequence>
+        <msNPSequence xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="int">$($lastSequence.Maximum+1)</msNPSequence>
     </Properties>
 </Test_deny>
 "@
-    
-    # 将两个模板转换为XML节点
-    $radiusFragment = $NPSConfig.CreateDocumentFragment()
-    $radiusFragment.InnerXml = $radiusTemplate
-    $networkFragment = $NPSConfig.CreateDocumentFragment()
-    $networkFragment.InnerXml = $networkTemplate
-    
-    # 分别插入到对应容器的首位(正式环境中是否一致，需要考虑的点是插在最上面且优先级设置为1是否拒绝策略都会生效，是否需要手动移动，因为手动添加的策略是有顺序的，这里是代码中强制固定)
-    $radiusContainer.InsertBefore($radiusFragment, $radiusContainer.FirstChild) | Out-Null
-    $networkContainer.InsertBefore($networkFragment, $networkContainer.FirstChild) | Out-Null
+        
+        # 将两个模板转换为XML节点
+        $radiusFragment = $NPSConfig.CreateDocumentFragment()
+        $radiusFragment.InnerXml = $radiusTemplate
+        $networkFragment = $NPSConfig.CreateDocumentFragment()
+        $networkFragment.InnerXml = $networkTemplate
+        
+        # 分别插入到对应容器的首位(正式环境中是否一致，需要考虑的点是插在最上面且优先级设置为1是否拒绝策略都会生效，是否需要手动移动，因为手动添加的策略是有顺序的，这里是代码中强制固定)
+        $radiusContainer.InsertBefore($radiusFragment, $radiusContainer.FirstChild) | Out-Null
+        $networkContainer.InsertBefore($networkFragment, $networkContainer.FirstChild) | Out-Null
+    }
     
     # 保存到临时文件并验证XML格式
     $tempFile = "$NPSConfigPath.tmp"

@@ -13,7 +13,7 @@ git clone https://github.com/minyugu/00scripts
 # or using SSH:
 #git clone git@github.com:your-org/your-repo.git
 # Create a new branch to work on
-git checkout -b feature/test-change
+git checkout -b feature/nps
 
 # Commit and push your changes
 git add .
