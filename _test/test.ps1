@@ -140,3 +140,44 @@ foreach ($npEnum in $networkPolicy.GetEnumerator() ) {
             }
         }
 }
+
+
+
+$npEnum.GetElementsByTagName("name") | Where-Object { $null -ne $_ } | ForEach-Object {
+    # enable policy
+
+        $_.InnerText
+
+}
+
+$npEnum.GetEnumerator()
+$networkPolicy.GetElementsByTagName("Test_deny") | Where-Object { $_ -ne $null } | ForEach-Object { $_.GetAttribute("name") }
+
+($networkPolicy.GetEnumerator()).GetElementsByTagName("msNPConstraint")  | fl *
+($networkPolicy.GetEnumerator())[0].GetElementsByTagName("Policy_Enabled") 
+
+$ddd = ($networkPolicy.GetEnumerator())
+
+
+foreach ($node in $networkPolicy.ChildNodes) {
+    $msNPConstraint = $node.GetElementsByTagName("msNPConstraint").InnerText
+    if (-not [String]::IsNullOrEmpty($msNPConstraint)) {
+        if ($msNPConstraint.trim() -eq "MATCH(`"Calling-Station-Id=$cleanMAC`")") {
+            $node.GetElementsByTagName("Policy_Enabled") | Where-Object { $null -ne $_ } | ForEach-Object {
+                if ($_.InnerText.trim() -eq "0") {
+                    $_.InnerText = "1"
+                }
+            }
+            $macExisted = $true
+            $policyNameNew = $node.name
+            break
+        }
+    }   
+}
+
+
+$node.GetElementsByTagName("Policy_Enabled") | Where-Object { $null -ne $_ } | ForEach-Object {
+    if ($_.InnerText.trim() -eq "0") {
+        $_.InnerText = "1"
+    }
+}

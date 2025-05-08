@@ -187,19 +187,23 @@ foreach ($MacAddress in $frequentMACs) {
         $macExisted = $false
         $networkPolicys = $NPSConfig.SelectNodes($networkXPath)
         foreach ($networkPolicy in $networkPolicys) {
-            foreach ($npEnum in $networkPolicy.GetEnumerator() ) {
-                $npEnum.GetElementsByTagName("msNPConstraint") | Where-Object { $null -ne $_ } | ForEach-Object {
-                    if ($_.InnerText.trim() -eq "MATCH(`"Calling-Station-Id=$cleanMAC`")") {
-                        $npEnum.GetElementsByTagName("Policy_Enabled") | Where-Object { $null -ne $_ } | ForEach-Object {
-                            # enable policy
+            foreach ($node in $networkPolicy.ChildNodes) {
+                # Check if the node has msNPConstraint included the mac address
+                $msNPConstraint = $node.GetElementsByTagName("msNPConstraint").InnerText
+                if (-not [String]::IsNullOrEmpty($msNPConstraint)) {
+                    if ($msNPConstraint.trim() -eq "MATCH(`"Calling-Station-Id=$cleanMAC`")") {
+                        # Check if the node has Policy_Enabled and its value is 0 (disabled)
+                        $node.GetElementsByTagName("Policy_Enabled") | Where-Object { $null -ne $_ } | ForEach-Object {
                             if ($_.InnerText.trim() -eq "0") {
+                                # enable the policy by setting Policy_Enabled to 1
                                 $_.InnerText = "1"
                             }
                         }
                         $macExisted = $true
+                        $policyNameNew = $node.name
                         break
                     }
-                }
+                }   
             }
         }
     #endregion

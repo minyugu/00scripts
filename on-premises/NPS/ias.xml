@@ -206,7 +206,7 @@
             <Test_deny name="拒绝MAC_9078-b254-4452_20250508171626">
     <Properties>
         <Opaque_Data xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string"></Opaque_Data>
-        <Policy_Enabled xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="boolean">1</Policy_Enabled>
+        <Policy_Enabled xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="boolean">0</Policy_Enabled>
         <Policy_SourceTag xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="int">0</Policy_SourceTag>
         <Template_Guid xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">{00000000-0000-0000-0000-000000000000}</Template_Guid>
         <msNPAction xmlns:dt="urn:schemas-microsoft-com:datatypes" dt:dt="string">Test-deny</msNPAction>
