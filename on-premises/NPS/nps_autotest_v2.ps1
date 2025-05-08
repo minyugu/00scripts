@@ -3,7 +3,8 @@
     Name: NPS策略自动添加工具（拒绝策略-PEAP，定时禁用）
     Version: 1.0
     Author: linzhengtao
-    Last Updated: 2025-01
+    Last Updated: 2025-05-08
+    verion: 2.0
 #>
 <# 1.1 xml格式校验，注意插入的节点是Microsoft_Internet_Authentication_Service name="Microsoft_Internet_Authentication_Service">测试服务器RadiusProfiles 下的 Children 节点和NetworkPolicy的位置
 且需要校验，优先级跟手动插入的不一样最高级都为1，脚本生成的是1，策略允许也是1，怎么判断和添加的上限？？有没有办法修改以循环遍历的方法顺序添加。。。
