@@ -12,7 +12,7 @@ shif+cmd+.
 Control+down
 
 #Telnet
-nc -vz 192.168.119.132 12201
+nc -vz 20.2.20.50 8850
 
 # traceroute
 traceroute -n 150.171.22.12

@@ -1,13 +1,28 @@
+Install-Module -Name Az -AllowClobber -Scope CurrentUser
+Update-Module Az
+
 Connect-AzAccount -Environment AzureChinaCloud
 Get-AzEnvironment | Select-Object -Property Name
 
-# $120 Subscription
-$TenantIdVSES = '43149fdb-048d-445c-8df1-8d4a8825e56c'
-Connect-AzAccount -Tenant $TenantIdVSES
+# Microsoft Non-ProductionSubscription
+Connect-AzAccount -Tenant '16b3c013-d300-468d-ac64-7eda0820b6d3'
 
-# $1000 Subscription
-$TenantIdMS = '72f988bf-86f1-41af-91ab-2d7cd011db47'
-Connect-AzAccount -Tenant $TenantIdMS
+Get-AzSubscription  # Lists all subscriptions
+Set-AzContext -SubscriptionId "3a163657-0260-487c-aee7-1d241e5398f0"
+
+# enable nested virtualization
+# https://docs.microsoft.com/en-us/azure/virtual-machines/windows/nested-virtualization-enable
+Set-AzVMProcessorFeature -ResourceGroupName "ea-rg-sddc" `
+  -VMName "ea-vm-sddc" -EnableNestedVirtualization $true
+
+Import-Module Az.Compute -Force
+Set-AzVM -ResourceGroupName "ea-rg-sddc" -Name "ea-vm-sddc" -EnableNestedVirtualization $true
+
+$vm = Get-AzVM -ResourceGroupName "ea-rg-sddc" -Name "ea-vm-sddc"
+$vm.HardwareProfile.VmSize = "Standard_E32s_v5"
+$vm.AdditionalCapabilities = @{ HibernationEnabled = $false; NestedVirtualizationEnabled = $true }
+
+Update-AzVM -VM $vm -NestedVirtualizationEnabled $true
 
 #environment
 $location = 'eastasia'
@@ -209,6 +224,7 @@ Invoke-RestMethod -Method PUT -Uri $uri -Headers $headers -Body $body
 # NSG
 
 #### Cli ##########========================================================================================================================
+az cloud set --name AzureChinaCloud
 $TenantIdVSES = '43149fdb-048d-445c-8df1-8d4a8825e56c'
 # $1000 Subscription
 $TenantIdMS = '72f988bf-86f1-41af-91ab-2d7cd011db47'
@@ -292,3 +308,38 @@ Get-MgUserAuthenticationPhoneMethod -UserId mygu@outlook.com
 # Export template and convert to bicep
 Export-AzResourceGroup -ResourceGroupName "your_resource_group_name" -Path ./main.json
 bicep decompile main.json
+
+# shutdown VM
+# Variables
+$resourceGroupName = "SDDC-LAB_GROUP"
+$vmName = "jumpbox"
+$time = "1900"              # UTC time in HHmm format (e.g., 1900 = 7:00 PM UTC)
+$timezone = "China Standard Time"  # Adjust to your region
+
+# Set auto-shutdown
+enable-
+Set-AzVM -ResourceGroupName $resourceGroupName -Name $vmName |
+  Set-AzVMAutoShutdown -Time $time -TimeZoneId $timezone -Enabled $true 
+  
+  # Set the resource group name and shutdown time
+RESOURCE_GROUP_NAME="myResourceGroup"
+SHUTDOWN_TIME="18:00"
+
+# Prompt the user to choose whether to auto-restart or leave the machines off
+echo "Do you want to auto-restart the machines? (y/n)"
+read RESTART_OPTION
+
+# Set the auto-shutdown and auto-start properties based on the user's choice
+if [ "$RESTART_OPTION" == "y" ]; then
+  AUTO_SHUTDOWN="true"
+  AUTO_START="true"
+else
+  AUTO_SHUTDOWN="true"
+  AUTO_START="false"
+fi
+
+# Loop through all VMs in the resource group and set the auto-shutdown and auto-start properties
+for VM_ID in $(az vm list -g $RESOURCE_GROUP_NAME --query "[].id" -o tsv); do
+  az vm auto-shutdown --ids $VM_ID --time $SHUTDOWN_TIME
+  az vm restart --ids $VM_ID --no-wait
+done
