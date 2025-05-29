@@ -243,7 +243,7 @@ foreach ($MacAddress in $frequentMACs) {
             $lastSequence = $NPSConfig.SelectNodes($networkXPath) | 
                 ForEach-Object { $_.GetElementsByTagName("msNPSequence") } |
                 Where-Object { $_ -ne $null } |
-                ForEach-Object { [int]$_.InnerText } |
+                ForEach-Object { [int]$_.InnerText | Where-Object {$_ -lt 5000} } |
                 Measure-Object -Maximum
             #endregion
 
