@@ -73,3 +73,52 @@ $filteredVMs = Get-SCVirtualMachine | Where-Object { $_.CustomProperty[$vmTagNam
 $SCPortACLRule = New-SCPortACLRule -Name "AllowOutBoundToDMZ" -PortACL $portAllACL -Description "Allow OutBound traffice to DMZ tag VM" `
                                    -Action Allow -Type Outbound -Priority 120 -Protocol Any -RemoteAddressPrefix $filteredVMs.VirtualNetworkAdapters.IPv4Addresses 
 #endregion 3.##### Allow OutBound to DMZ tag VM
+
+ #region 4.##### Quarantine VM
+# Create a port ACL
+
+$portAllACL = New-SCPortACL -Name "QuarantineVM-PortACL" -Description "$vmName PortACL to control ALL access" -ManagedByNC
+
+# Create a port ACL rule
+New-SCPortACLRule -Name "Quarantine-Rule-DenyAllInbound" -PortACL $portAllACL -Description "Deny All Inbound Access Rule" -Action Deny -Type Inbound -Priority 10 -Protocol Any -LocalPortRange 0-65535
+New-SCPortACLRule -Name "Quarantine-Rule-DenyAllOutbound" -PortACL $portAllACL -Description "Deny All Outbound Access Rule" -Action Deny -Type Outbound -Priority 11 -Protocol Any -LocalPortRange 0-65535
+
+$quarantineType = "QuarantineVM-PortACL"
+$vmName = "vpc01-sub100-v2"
+$adapter = Get-SCVirtualMachine -Name $vmName | Get-SCvirtualNetworkAdapter
+$portAllACL = Get-SCPortACL -Name $quarantineType
+Set-SCVirtualNetworkAdapter -VirtualNetworkAdapter $adapter -PortACL $portAllACL
+
+
+#endregion 4.##### Quarantine VM
+
+
+
+#region 5.##### Diagnostics Quarantine VM
+# Create a port ACL
+
+$portAllACL = New-SCPortACL -Name "DiagQuarantineVM-PortACL" -Description "$vmName PortACL to control ALL access" -ManagedByNC
+
+# Create a port ACL rule
+New-SCPortACLRule -Name "DiagQuarantine-Rule-DenyAllInbound" -PortACL $portAllACL -Description "Deny All Inbound Access Rule" -Action Deny -Type Inbound -Priority 10 -Protocol Any -LocalPortRange 0-65535
+New-SCPortACLRule -Name "DiagQuarantine-Rule-DenyAllOutbound" -PortACL $portAllACL -Description "Deny All Outbound Access Rule" -Action Deny -Type Outbound -Priority 11 -Protocol Any -LocalPortRange 0-65535
+New-SCPortACLRule -Name "DiagQuarantine-Rule-AllowSshInbound" -PortACL $portAllACL -Description "Allow SSH Inbound Access Rule" -Action Allow -Type Inbound -Priority 5 -Protocol TCP -LocalPortRange 22
+
+# Diagnostics Quarantine VM vpc01-sub100-v2
+$quarantineType = "DiagQuarantineVM-PortACL"
+$vmName = "vpc01-sub100-v2"
+$adapter = Get-SCVirtualMachine -Name $vmName | Get-SCvirtualNetworkAdapter
+$portAllACL = Get-SCPortACL -Name $quarantineType
+Set-SCVirtualNetworkAdapter -VirtualNetworkAdapter $adapter -PortACL $portAllACL
+
+#endregion 5.##### Diagnostics Quarantine VM
+
+
+# get
+(Get-SCPortACL -Name "QuarantineVM-PortACL")
+(Get-SCPortACL -Name "DiagQuarantineVM-PortACL")
+
+# remove 
+Get-SCPortACLRule -Name "DiagQuarantine-Rule-AllowSshInbound" | Remove-SCPortACLRule
+$portAllACL | Remove-SCPortACL 
+
