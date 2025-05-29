@@ -22,7 +22,7 @@ $LogDir = "$BackupDir\Logs"
 $TranscriptLog = "$LogDir\Operation_$(Get-Date -Format 'yyyyMMddHHmmss').log"
 
 ###### remove after test
-$NPSConfigPath = "C:\00scripts\on-premises\NPS\ias.xml"
+#$NPSConfigPath = "C:\00scripts\on-premises\NPS\ias.xml"
 
 $UnlockHours = 1 # default unlock hours
 
@@ -83,7 +83,7 @@ $macOccurrences = @{}
 # Get the relevant events from the Windows Event Log
 $events = Get-WinEvent -FilterHashtable @{Id = $eventID; StartTime = $timeSpan; LogName = $logName} -MaxEvents $maxEvents -ErrorAction SilentlyContinue
 ###### remove after test
-$events = Get-WinEvent -FilterHashtable @{Id = $eventID; Path = "C:\Users\odacol\Desktop\Security.evtx"} -MaxEvents $maxEvents
+#$events = Get-WinEvent -FilterHashtable @{Id = $eventID; Path = "C:\Users\odacol\Desktop\Security.evtx"} -MaxEvents $maxEvents
 if ($events.count -gt 0){
     Write-Host "Found $($events.count) events in the last 10 minutes."
     foreach ($event in $events) {
