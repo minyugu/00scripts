@@ -3,4 +3,4 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v TargetReleas
 
 
 
-DISM.exe /Online /add-capability /CapabilityName:Language.Basic~~~en-US~0.0.1.0 /Source:E:
+DISM.exe /Online /add-capability /CapabilityName:Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0 /Source:G:

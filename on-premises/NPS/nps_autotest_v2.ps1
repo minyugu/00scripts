@@ -92,7 +92,8 @@ if ($events.count -gt 0){
 
         # check whether the mac already have been block by a nps policy
         # Use regex to check if the message includes "Network Policy Name:" followed by "-" -- meaning no policy enabled
-        if ($message -match "$($npNameField)\s+-") {
+        # if ( $message -match "$($npNameField)\s+-" ) {
+        if ( $message -notmatch "$($npNameField)\s+拒绝MAC_" ) {
             # Use regex to find the MAC address in the "Calling Station Identifier" field
             if ($message -match "$($clientMacField)\s+([0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4})") {
                 $mac = $matches[1] # Extract the MAC address
